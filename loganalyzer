@@ -1,16 +1,47 @@
 #!/usr/bin/python3
 
 from sys import argv as av
+import re
+from collections import Counter
+
+def print_out(ip_list, request_method):
+    ips_count = len((ip_list))
+    ip_count = Counter(ip_list)
+    method_count = Counter(request_method)
+
+    print("Log Analysis Summary:")
+    print("---------------------")
+    print(f"Total number of IP addresses: {ips_count}\n")
+    
+    print("IP Address Counts:")
+    for ip, count in ip_count.items():
+        print(f"- {ip}: {count}")
+    print("\nRequest Method Counts:")
+    for method, count in method_count.items():
+        print(f"- {method}: {count}")
 
 def parse(content):
+    ip_list = []
+    request_method = []
+    log_regex = re.compile(r'(\S+)\s+-\s+-\s+\[.*?\]\s+"(\S+).*?"')
+    for line in content:
+        match = log_regex.match(line)
+        if match:
+            ip = match.group(1)
+            method = match.group(2)
+            ip_list.append(ip)
+            request_method.append(method)
+    if (ip_list is None or request_method is None):
+        return
+    if (not ip_list or not request_method):
+        print("Error :/ can't find any ips or methods in the file")
+        return 
+    print_out(ip_list, request_method)
     
-    # ips, date, method = content.partition(' ')
-    # print(, end="")
 
 def open_file(fileN):
     try:
-        with open(fileN, "r") as f:
-            content = f.read()
+        with open(fileN, "r") as content:
             parse(content)
     except FileNotFoundError:
         print("Error: The File {} not found".format(fileN));
